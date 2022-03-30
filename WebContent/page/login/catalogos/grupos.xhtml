@@ -1,0 +1,141 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	template="/templates/template.xhtml">
+	<ui:define name="content">
+		<h:form id="frm">
+			<div align="center">
+				<p:panel id="mainPanel" header="Catalogo de Grupos"
+					styleClass="tituloPantalla">
+					<p:dataTable value="#{grupoMB.invGrupoList}" var="reg"
+						rowKey="#{reg.grpId}">
+						<f:facet name="header">
+							<div align="left">
+								<p:commandButton value="Nuevo grupo" icon="ui-icon-document"
+									update=":frm:dlgGrupo" oncomplete="PF('grupoDialog').show()">
+									<f:setPropertyActionListener target="#{grupoMB.nuevo}"
+										value="true" />
+								</p:commandButton>
+							</div>
+						</f:facet>
+						<p:column headerText="Codigo de grupo" style="text-align: center;">
+							<h:outputText value="#{reg.grpCodigo}" />
+						</p:column>
+						<p:column headerText="Nombre">
+							<h:outputText value="#{reg.grpNombre}" />
+						</p:column>
+						<p:column headerText="Ver" style="width:32px; text-align: center;">
+							<p:commandButton update=":frm:dlgGrupo"
+								oncomplete="PF('grupoDialog').show()" icon="ui-icon-search"
+								title="View">
+								<f:setPropertyActionListener value="#{reg}"
+									target="#{grupoMB.invGrupo}" />
+							</p:commandButton>
+						</p:column>
+						<p:column headerText="Editar"
+							style="width:32px; text-align: center;">
+							<p:commandButton update=":frm:grupoDetail"
+								oncomplete="PF('grupoDialog').show()" icon="ui-icon-pencil"
+								title="Edit">
+								<f:setPropertyActionListener value="#{reg}"
+									target="#{grupoMB.invGrupo}" />
+								<f:setPropertyActionListener target="#{grupoMB.editar}"
+									value="true" />
+							</p:commandButton>
+						</p:column>
+						<p:column headerText="Eliminar"
+							style="width:32px; text-align: center;">
+							<p:commandButton update=":frm" action="#{grupoMB.onEliminar}" icon="ui-icon-trash" title="Delete"
+								onclick="if (!confirm('Esta seguro de eliminar el grupo seleccionado ?')){return false;}">
+								<f:setPropertyActionListener target="#{grupoMB.invGrupo}" value="#{reg}" />
+							</p:commandButton>
+						</p:column>
+					</p:dataTable>
+				</p:panel>
+			</div>
+			<p:dialog id="dlgGrupo" header="Información del grupo" widgetVar="grupoDialog"
+				modal="true" showEffect="fade" hideEffect="fade" resizable="false"
+				visible="#{facesContext.validationFailed}">
+				<p:messages id="messagesInDialog" />
+				<p:ajax event="close" listener="#{grupoMB.clean}" />
+				<p:outputPanel id="grupoDetail" style="text-align:center;">
+					<p:panelGrid id="pgGrupo">
+						<p:row rendered="#{!grupoMB.nuevo}">
+							<p:column style="width: 120px;">
+								<p:outputLabel value="Codigo: " for="codigoGrupo" />
+							</p:column>
+							<p:column style="width: 300px;">
+								<p:inputText id="codigoGrupo"
+									value="#{grupoMB.invGrupo.grpCodigo}"
+									converter="upperConverter" styleClass="input-text-upper"
+									style="width: 400px;" readonly="true" />
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column style="width: 120px;">
+								<p:outputLabel value="Nombre: " for="nombreGrupo" />
+							</p:column>
+							<p:column style="width: 300px;">
+								<p:inputText id="nombreGrupo"
+									value="#{grupoMB.invGrupo.grpNombre}"
+									converter="upperConverter" styleClass="input-text-upper"
+									required="true" requiredMessage="Debe digitar nombre del grupo"
+									style="width: 400px;"
+									readonly="#{!grupoMB.editar and (!grupoMB.nuevo)}" />
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column style="width: 120px;">
+								<p:outputLabel value="Descripcion: " for="descGrupo" />
+							</p:column>
+							<p:column style="width: 300px;">
+								<p:inputTextarea id="descGrupo"
+									value="#{grupoMB.invGrupo.grpDescripcion}"
+									converter="upperConverter" required="true"
+									requiredMessage="Debe digitar descripcion del grupo"
+									style="width: 400px; !important;text-transform: uppercase;"
+									readonly="#{!grupoMB.editar and (!grupoMB.nuevo)}" rows="3"
+									autoResize="false" />
+							</p:column>
+						</p:row>
+						<p:row rendered="#{grupoMB.nuevo}">
+							<p:column colspan="2">
+								<div align="left">
+									<p:commandButton value="Guardar"
+										actionListener="#{grupoMB.onGuardar}"
+										onclick="if (!confirm('Esta seguro de guardar la información ingresada ?')){return false;}"
+										oncomplete="handleDialogo(xhr, status, args)"
+										update=":frm:grupoDetail, :frm" process="@this, :frm:grupoDetail" />
+								</div>
+							</p:column>
+						</p:row>
+						<p:row rendered="#{grupoMB.editar}">
+							<p:column colspan="2" style="align: left;">
+								<div align="left">
+									<p:commandButton value="Editar" actionListener="#{grupoMB.onEditar}"
+										onclick="if (!confirm('Esta seguro de guardar la información ingresada ?')){return false;}"
+										oncomplete="handleDialogo(xhr, status, args)"
+										update=":frm:grupoDetail, :frm" process="@this, :frm:grupoDetail" />
+								</div>
+							</p:column>
+						</p:row>
+					</p:panelGrid>
+				</p:outputPanel>
+			</p:dialog>
+		</h:form>
+		<script type="text/javascript">
+		function handleDialogo(xhr, status, args) {
+			if (args.validationFailed || !args.success) {
+				jQuery('#frm\\:dlgGrupo').effect("shake", {
+					times : 3
+				}, 100);
+			} else {
+				PF('grupoDialog').hide();
+			}
+		}
+	</script>
+	</ui:define>
+</ui:composition>

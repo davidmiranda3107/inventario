@@ -1,0 +1,174 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	template="/templates/template.xhtml">
+	<ui:define name="content">
+		<h:form id="frm">
+			<div align="center">
+				<p:panel id="mainPanel" header="Salidas de productos"
+					styleClass="tituloPantalla">
+					<br />
+					<div align="left">
+						<p:fieldset legend="Datos del movimiento">
+							<p:panelGrid styleClass="borderless-pg">
+								<p:row>
+									<p:column style="width: 100px;">
+										<p:outputLabel for="inventario" value="Inventario" />
+									</p:column>
+									<p:column>
+										<p:autoComplete id="inventario"
+											value="#{inventarioMB.inventario}"
+											completeMethod="#{inventarioMB.autoCompleteInventario}"
+											size="100" required="true" requiredMessage="Debe seleccionar inventario"/>
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column colspan="2">
+										<p:dataTable id="dtProductos" var="reg"
+											value="#{inventarioMB.prodSelectedList}"
+											rowKey="#{reg.producto.invdId}" selectionMode="single"
+											paginator="true" rows="10"
+											selection="#{inventarioMB.prodSelected}"
+											sortBy="#{reg.producto.invPlanta.planNombre}"
+											rowsPerPageTemplate="5,10,15,20,25"
+											paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+											paginatorPosition="bottom"
+											emptyMessage="No hay productos seleccionados">
+											<f:facet name="header">
+												<div align="left">
+													<p:commandButton value="Agregar producto"
+														process="@form:inventario" icon="ui-icon-document"
+														update="@form:dlgProductos"
+														oncomplete="PF('productoDialog').show()">
+													</p:commandButton>
+												</div>
+											</f:facet>
+											<p:column headerText="Codigo de producto"
+												style="text-align: center;">
+												<h:outputText value="#{reg.producto.invPlanta.planCodigo}" />
+											</p:column>
+											<p:column headerText="Nombre" style="text-align: center;">
+												<h:outputText value="#{reg.producto.invPlanta.planNombre}" />
+											</p:column>
+											<p:column headerText="Cantidad" style="text-align: center;">
+												<h:outputText value="#{reg.cantidad}" />
+											</p:column>
+											<p:column headerText="Eliminar"
+												style="width:32px; text-align: center;">
+												<p:commandButton update=":frm" process="@this"
+													action="#{inventarioMB.onEliminarProducto}"
+													icon="ui-icon-trash" title="Delete"
+													onclick="if (!confirm('Esta seguro de eliminar el grupo seleccionado ?')){return false;}">
+													<f:setPropertyActionListener
+														target="#{inventarioMB.objMovimiento}" value="#{reg}" />
+												</p:commandButton>
+											</p:column>
+										</p:dataTable>
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column style="width: 100px;">
+										<p:outputLabel for="observacion" value="Observación" />
+									</p:column>
+									<p:column>
+										<p:inputTextarea id="observacion" value="#{inventarioMB.observacion}" 
+											style="width: 100% !important;" autoResize="false" rows="6"
+											required="true" requiredMessage="Debe digitar una observación" />
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column colspan="2">
+										<p:commandButton value="Guardar" action="#{inventarioMB.onGuardarResta}"
+											process="@this, inventario,observacion" update="@form"
+											onclick="if (!confirm('¿ Guardar información ingresada ?')){return false;}" />
+									</p:column>
+								</p:row>
+							</p:panelGrid>
+						</p:fieldset>
+					</div>
+				</p:panel>
+			</div>
+			<p:dialog id="dlgProductos" widgetVar="productoDialog"
+				header="Listado de productos" modal="true" closeOnEscape="true"
+				width="500px;">
+				<p:ajax event="close"/>
+				<p:panel id="pdlgProductos">
+					<div align="center">
+						<p:dataTable id="dtProd" value="#{inventarioMB.inventarioDetList}"
+							var="reg" rowKey="#{reg.invdId}"
+							selection="#{inventarioMB.prodSelected.producto}"
+							selectionMode="single" rows="10"
+							rowsPerPageTemplate="5,10,15,20,25"
+							paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+							paginatorPosition="bottom" paginator="true"
+							emptyMessage="No hay productos disponibles">
+							<p:ajax event="rowSelect" process="@this" update="@form:dlgCantidad" oncomplete="PF('productoDialog').hide(); PF('cantidadDialog').show();" />
+							<p:column headerText="Codigo de producto"
+								style="text-align: center;" filterMatchMode="startsWith"
+								filterBy="#{reg.invPlanta.planCodigo}">
+								<h:outputText value="#{reg.invPlanta.planCodigo}" />
+							</p:column>
+							<p:column headerText="Nombre" style="text-align: center;"
+								filterMatchMode="startsWith"
+								filterBy="#{reg.invPlanta.planNombre}">
+								<h:outputText value="#{reg.invPlanta.planNombre}" />
+							</p:column>
+						</p:dataTable>
+					</div>
+				</p:panel>
+			</p:dialog>
+			<p:dialog id="dlgCantidad" widgetVar="cantidadDialog"
+				header="Datos del producto" modal="true" closeOnEscape="true"
+				visible="#{facesContext.validationFailed}"
+				width="500px;">
+				<p:ajax event="close" update="@form:dtProductos" />
+				<p:panel id="pdlgCantidad"
+					rendered="#{inventarioMB.prodSelected.producto ne null}">
+					<div align="center">
+						<p:panelGrid id="pgCantidad">
+							<p:row>
+								<p:column>
+									<p:outputLabel value="Codigo" />
+								</p:column>
+								<p:column>
+									<p:inputText
+										value="#{inventarioMB.prodSelected.producto.invPlanta.planCodigo}" />
+								</p:column>
+							</p:row>
+							<p:row>
+								<p:column>
+									<p:outputLabel value="Producto" />
+								</p:column>
+								<p:column>
+									<p:inputText
+										value="#{inventarioMB.prodSelected.producto.invPlanta.planNombre}" />
+								</p:column>
+							</p:row>
+							<p:row>
+								<p:column>
+									<p:outputLabel value="Cantidad" />
+								</p:column>
+								<p:column>
+									<p:inputText id="cantidad" value="#{inventarioMB.prodSelected.cantidad}"
+										required="true" requiredMessage="Debe digitar la cantidad"
+										validatorMessage="La cantidad digitada no es válida">
+										<f:validateLongRange minimum="1" />
+									</p:inputText>
+								</p:column>
+							</p:row>
+							<p:row>
+								<p:column>
+									<p:commandButton value="Agregar" process="@this, cantidad" action="#{inventarioMB.onAgregarProductoSalida}"
+										update="@form:dtProductos" oncomplete="PF('cantidadDialog').hide()"/>
+								</p:column>
+							</p:row>
+						</p:panelGrid>
+					</div>
+				</p:panel>
+			</p:dialog>
+		</h:form>			
+	</ui:define>
+</ui:composition>	

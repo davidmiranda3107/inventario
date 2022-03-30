@@ -1,0 +1,195 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	template="/templates/template.xhtml">
+	<ui:define name="content">
+		<h:form id="frm">
+			<h:outputScript library="js" name="calendar_es.js" />
+			<div align="center">
+				<p:panel id="mainPanel"
+					header="Consulta de movimientos de productos"
+					styleClass="tituloPantalla">
+					<br />
+					<div align="left">
+						<p:fieldset>
+							<p:panelGrid styleClass="borderless-pg">
+								<p:row>
+									<p:column style="width: 140px;">
+										<p:outputLabel value="Tipo de movimiento" for="movimiento" />
+									</p:column>
+									<p:column>
+										<p:autoComplete id="movimiento"
+											value="#{consultaMB.movimiento}" size="100"
+											completeMethod="#{consultaMB.autoCompleteMov}" />
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column style="width: 140px;">
+										<p:outputLabel value="Inventario" for="inventario" />
+									</p:column>
+									<p:column>
+										<p:autoComplete id="inventario"
+											value="#{consultaMB.inventario}"
+											completeMethod="#{consultaMB.autoCompleteInventario}"
+											size="100" />
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column style="width: 140px;">
+										<p:outputLabel value="Grupo" for="grupo" />
+									</p:column>
+									<p:column>
+										<p:autoComplete id="grupo" value="#{consultaMB.grupo}"
+											completeMethod="#{consultaMB.autoCompleteGrupo}" size="100" />
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column style="width: 140px;">
+										<p:outputLabel value="Producto" for="producto" />
+									</p:column>
+									<p:column>
+										<p:autoComplete id="producto" value="#{consultaMB.producto}"
+											completeMethod="#{consultaMB.autoCompleteProducto}"
+											size="100" />
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column style="width: 140px;">
+										<p:outputLabel value="Fecha inicio" for="inicio" />
+									</p:column>
+									<p:column>
+										<p:calendar id="inicio" value="#{consultaMB.fecDesde}"
+											locale="es" pattern="dd/MM/yyyy">
+											<p:ajax event="dateSelect" update="fin" />
+										</p:calendar>
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column style="width: 140px;">
+										<p:outputLabel value="Fecha fin" for="fin" />
+									</p:column>
+									<p:column>
+										<p:calendar id="fin" value="#{consultaMB.fecHasta}"
+											locale="es" pattern="dd/MM/yyyy"
+											mindate="#{consultaMB.fecDesde}" />
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column colspan="2">
+										<p:commandButton value="Buscar"
+											action="#{consultaMB.buscarMovimiento}" process="@form"
+											update="@form" />
+										<p:commandButton value="Limpiar" update="@form"
+											process="@this" action="#{consultaMB.clean}" />
+									</p:column>
+								</p:row>
+							</p:panelGrid>
+						</p:fieldset>
+					</div>
+					<br />
+					<p:dataTable id="dtProductos" rendered="#{consultaMB.mostrarTabla}"
+						value="#{consultaMB.movimientoList}" var="m" rowKey="#{m.movId}"
+						paginator="true" rows="25" paginatorPosition="bottom"
+						rowsPerPageTemplate="10,15,20,25"
+						emptyMessage="No hay movimientos para mostrar"
+						styleClass="custom-dt-borderless">
+						<p:column headerText="Codigo">
+							<h:outputText value="#{m.movCodigo}" />
+						</p:column>
+						<p:column headerText="Tipo movimiento">
+							<h:outputText value="#{m.invTipoMovimiento.tipNombre}" />
+						</p:column>
+						<p:column headerText="Fecha movimiento">
+							<h:outputText value="#{m.fecCrea}">
+								<f:convertDateTime pattern="dd/MM/yyyy" />
+							</h:outputText>
+						</p:column>
+						<p:column headerText="Ver" style="width:32px; text-align: center;">
+							<p:commandButton icon="ui-icon-search" title="Ver"
+								update=":frmMovimiento" process="@this"
+								oncomplete="PF('dlgMovimientowv').show()">
+								<f:setPropertyActionListener target="#{consultaMB.movSelected}"
+									value="#{m}" />
+							</p:commandButton>
+						</p:column>
+					</p:dataTable>
+				</p:panel>
+			</div>
+		</h:form>
+		<p:dialog id="dlgMovimiento" header="Información del movimiento"
+			widgetVar="dlgMovimientowv" modal="true" closeOnEscape="true"
+			showEffect="fade" hideEffect="fade" resizable="false"
+			position="center">
+			<h:form id="frmMovimiento">
+				<p:panelGrid>
+					<p:row>
+						<p:column style="width: 150px;">
+							<p:outputLabel value="Tipo de movimiento" />
+						</p:column>
+						<p:column style="width: 350px;">
+							<p:outputLabel
+								value="#{consultaMB.movSelected.invTipoMovimiento.tipNombre}"/>
+						</p:column>
+					</p:row>
+					<p:row>
+						<p:column>
+							<p:outputLabel value="Fecha de movimiento" />
+						</p:column>
+						<p:column>
+							<p:outputLabel value="#{consultaMB.movSelected.fecCrea}">
+								<f:convertDateTime pattern="dd/MM/yyyy" />
+							</p:outputLabel>
+						</p:column>
+					</p:row>
+					<p:row>
+						<p:column>
+							<p:outputLabel value="Codigo de mov." />
+						</p:column>
+						<p:column>
+							<p:outputLabel value="#{consultaMB.movSelected.movCodigo}" />
+						</p:column>
+					</p:row>
+					<p:row>
+						<p:column>
+							<p:outputLabel value="Codigo de prod." />
+						</p:column>
+						<p:column>
+							<p:outputLabel
+								value="#{consultaMB.movSelected.invInventarioDet.invPlanta.planCodigo}" />
+						</p:column>
+					</p:row>
+					<p:row>
+						<p:column>
+							<p:outputLabel value="Producto" />
+						</p:column>
+						<p:column>
+							<p:outputLabel
+								value="#{consultaMB.movSelected.invInventarioDet.invPlanta.planNombre}" />
+						</p:column>
+					</p:row>
+					<p:row>
+						<p:column>
+							<p:outputLabel value="Cantidad" />
+						</p:column>
+						<p:column>
+							<p:outputLabel value="#{consultaMB.movSelected.movCantidad}" />
+						</p:column>
+					</p:row>
+					<p:row>
+						<p:column>
+							<p:outputLabel value="Monto" />
+						</p:column>
+						<p:column>
+							<p:outputLabel value="#{consultaMB.movSelected.movMonto}">
+								<f:convertNumber type="currency" currencySymbol="$" locale="en_US" />
+							</p:outputLabel>
+						</p:column>
+					</p:row>
+				</p:panelGrid>
+			</h:form>
+		</p:dialog>
+	</ui:define>
+</ui:composition>

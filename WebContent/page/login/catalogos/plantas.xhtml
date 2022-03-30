@@ -1,0 +1,126 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	template="/templates/template.xhtml">
+	<ui:define name="content">
+		<h:form id="frm">
+			<div align="center">
+				<p:panel id="mainPanel" header="Agregar nuevo producto"
+					styleClass="tituloPantalla">
+					<div align="left">
+						<p:panelGrid id="pgProducto" styleClass="borderless-pg">
+							<p:row>
+								<p:column style="width: 140px;">
+									<p:outputLabel value="Grupo: " for="grpProducto" />
+								</p:column>
+								<p:column>
+									<p:selectOneMenu id="grpProducto"
+										value="#{plantaMB.invPlanta.invGrupo}" required="true"
+										requiredMessage="Debe seleccionar un grupo"
+										style="width:250px;" converter="#{grupoConverter}">
+										<f:selectItem itemLabel="Seleccione..."
+											noSelectionOption="true" />
+										<f:selectItems value="#{plantaMB.grupoList}" var="grupo"
+											itemLabel="#{grupo.grpNombre}" itemValue="#{grupo}" />
+									</p:selectOneMenu>
+								</p:column>
+							</p:row>
+							<p:row>
+								<p:column>
+									<p:outputLabel value="Origen: " for="grpOrigen" />
+								</p:column>
+								<p:column>
+									<p:selectOneMenu id="grpOrigen"
+										value="#{plantaMB.invPlanta.planOrigen}" required="true"
+										requiredMessage="Debe seleccionar un origen"
+										style="width:250px;">
+										<f:selectItem itemLabel="Seleccione..." noSelectionOption="true"/>
+										<f:selectItem itemLabel="INTERNO" itemValue="I"/>
+										<f:selectItem itemLabel="EXTERNO" itemValue="E"/>
+									</p:selectOneMenu>
+								</p:column>
+							</p:row>
+							<p:row>
+								<p:column style="width: 140px;">
+									<p:outputLabel value="Nombre: " for="nomProducto" />
+								</p:column>
+								<p:column>
+									<p:inputText id="nomProducto"
+										value="#{plantaMB.invPlanta.planNombre}"
+										converter="upperConverter" styleClass="input-text-upper"
+										required="true"
+										requiredMessage="Debe digitar nombre del producto"
+										style="width: 400px;" />
+								</p:column>
+							</p:row>
+							<p:row>
+								<p:column style="width: 140px;">
+									<p:outputLabel value="Descripcion: " for="descPlanta" />
+								</p:column>
+								<p:column>
+									<p:inputTextarea id="descPlanta"
+										value="#{plantaMB.invPlanta.planDescripcion}"
+										converter="upperConverter" required="true"
+										requiredMessage="Debe digitar descripcion del producto"
+										style="width: 400px; !important;text-transform: uppercase;"
+										rows="3" autoResize="false" />
+								</p:column>
+							</p:row>
+							<p:row>
+								<p:column style="width: 140px;">
+									<p:outputLabel value="Precio Unitario $: " for="precioUnitario" />
+								</p:column>
+								<p:column>
+									<p:inputText id="precioUnitario"
+										value="#{plantaMB.invPlanta.planPrecioUnitario}"
+										required="true" requiredMessage="Debe digitar precio unitario">
+										<f:convertNumber pattern="#,###.##" />
+										<p:ajax event="change" update="precioIva, precioPlanta"
+											process="@this" listener="#{plantaMB.actualizaPrecio}" />
+									</p:inputText>
+								</p:column>
+							</p:row>
+							<p:row>
+								<p:column style="width: 140px;">
+									<p:outputLabel value="IVA $: " for="precioIva" />
+								</p:column>
+								<p:column>
+									<p:inputText id="precioIva"
+										value="#{plantaMB.invPlanta.planPrecioIva}"
+										required="true" requiredMessage="Debe digitar IVA"
+										readonly="true">
+										<f:convertNumber pattern="#,###.##" />
+									</p:inputText>
+								</p:column>
+							</p:row>
+							<p:row>
+								<p:column style="width: 140px;">
+									<p:outputLabel value="Precio Final $: " for="precioPlanta" />
+								</p:column>
+								<p:column>
+									<p:inputText id="precioPlanta"
+										value="#{plantaMB.invPlanta.planPrecio}"
+										required="true" requiredMessage="Debe digitar precio final"
+										readonly="true">
+										<f:convertNumber pattern="#,###.##" minFractionDigits="2" />
+									</p:inputText>
+								</p:column>
+							</p:row>
+							<p:row>
+								<p:column colspan="2">
+									<p:commandButton value="Guardar" process="@form" update="@form"
+										action="#{plantaMB.onGuardar}"
+										onclick="if (!confirm('¿ Guardar información ingresada ?')){return false;}"
+										oncomplete="if (#{facesContext.maximumSeverity==null})" />
+								</p:column>
+							</p:row>
+						</p:panelGrid>
+					</div>
+				</p:panel>
+			</div>
+		</h:form>
+	</ui:define>
+</ui:composition>

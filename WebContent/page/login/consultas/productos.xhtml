@@ -1,0 +1,136 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	template="/templates/template.xhtml">
+	<ui:define name="content">
+		<h:form id="frm">
+			<div align="center">
+				<p:panel id="mainPanel" header="Consulta de productos"
+					styleClass="tituloPantalla">
+					<br />
+					<div align="left">
+						<p:fieldset>
+							<p:panelGrid styleClass="borderless-pg">
+								<p:row>
+									<p:column style="width: 140px;">
+										<p:outputLabel for="inventario" value="Inventario" />
+									</p:column>
+									<p:column>
+										<p:autoComplete id="inventario"
+											value="#{consultaMB.inventario}"
+											completeMethod="#{consultaMB.autoCompleteInventario}"
+											size="100" />
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column style="width: 140px;">
+										<p:outputLabel for="grupo" value="Grupo" />
+									</p:column>
+									<p:column>
+										<p:autoComplete id="grupo" value="#{consultaMB.grupo}"
+											completeMethod="#{consultaMB.autoCompleteGrupo}" size="100" />
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column style="width: 140px;">
+										<p:outputLabel for="producto" value="Producto" />
+									</p:column>
+									<p:column>
+										<p:autoComplete id="producto" value="#{consultaMB.producto}"
+											completeMethod="#{consultaMB.autoCompleteProducto}"
+											size="100" />
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column colspan="2">
+										<p:commandButton value="Buscar"
+											action="#{consultaMB.buscarProductoxInventario}"
+											process="@form" update="@form" />
+										<p:commandButton value="Limpiar" update="@form"
+											process="@this" action="#{consultaMB.clean}" />
+									</p:column>
+								</p:row>
+							</p:panelGrid>
+						</p:fieldset>
+					</div>
+					<br />
+					<p:dataTable id="dtProductos" rendered="#{consultaMB.mostrarTabla}"
+						value="#{consultaMB.productoList}" var="p" rowKey="#{p.invdId}"
+						paginator="true" rows="25"
+						paginatorPosition="bottom" rowsPerPageTemplate="10,15,20,25"
+						emptyMessage="No hay productos para mostrar"
+						styleClass="custom-dt-borderless">
+						<p:column headerText="Inventario">
+							<h:outputText value="#{p.invInventario.invNombre}" />
+						</p:column>
+						<p:column headerText="Grupo">
+							<h:outputText value="#{p.invPlanta.invGrupo.grpNombre}" />
+						</p:column>
+						<p:column headerText="Producto">
+							<h:outputText value="#{p.invPlanta.planNombre}" />
+						</p:column>
+						<p:column headerText="Ver"
+							style="width:32px; text-align: center;">
+							<p:commandButton icon="ui-icon-search" title="Ver"
+								 update=":frmProducto" process="@this" oncomplete="PF('dlgProductowv').show()">
+								<f:setPropertyActionListener target="#{consultaMB.prodSelected}" value="#{p}" />
+							</p:commandButton>
+						</p:column>	
+					</p:dataTable>
+				</p:panel>
+			</div>
+		</h:form>
+		<p:dialog id="dlgProducto" header="Información del producto" widgetVar="dlgProductowv" modal="true"
+       			closeOnEscape="true" showEffect="fade" hideEffect="fade" resizable="false">
+			<h:form id="frmProducto">
+				<p:outputPanel id="grupoDetail" style="text-align:center;">
+					<p:panelGrid id="pgGrupo">
+						<p:row>
+							<p:column>
+								<p:outputLabel value="Codigo" />
+							</p:column>
+							<p:column>
+								<p:inputText readonly="true" value="#{consultaMB.prodSelected.invPlanta.planCodigo}" />
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<p:outputLabel value="Nombre" />
+							</p:column>
+							<p:column>
+								<p:inputText readonly="true" value="#{consultaMB.prodSelected.invPlanta.planNombre}" />
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<p:outputLabel value="Descripcion" />
+							</p:column>
+							<p:column>
+								<p:inputTextarea readonly="true" value="#{consultaMB.prodSelected.invPlanta.planDescripcion}" />
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<p:outputLabel value="Precio unitario" />
+							</p:column>
+							<p:column>
+								<p:inputText readonly="true" value="#{consultaMB.prodSelected.invPlanta.planPrecioUnitario}" />
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column>
+								<p:outputLabel value="Existencias" />
+							</p:column>
+							<p:column>
+								<p:inputText readonly="true" value="#{consultaMB.prodSelected.invdExistencia}" />
+							</p:column>
+						</p:row>
+					</p:panelGrid>
+				</p:outputPanel>	
+			</h:form>
+		</p:dialog>
+	</ui:define>
+</ui:composition>
